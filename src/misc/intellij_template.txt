@@ -1,0 +1,44 @@
+#if (${PACKAGE_NAME} && ${PACKAGE_NAME} != "")package ${PACKAGE_NAME};#end
+#parse("File Header.java")
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.StringTokenizer;
+
+public class ${NAME} {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    StringTokenizer tokenizer = new StringTokenizer("");
+    PrintWriter out = new PrintWriter(System.out);
+    String next() {
+        while (!tokenizer.hasMoreTokens()) {
+            try {
+                tokenizer = new StringTokenizer(reader.readLine());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return tokenizer.nextToken();
+    }
+    int nextInt() { return Integer.parseInt(next()); }
+    long nextLong() { return Long.parseLong(next()); }
+    float nextFloat() { return Float.parseFloat(next()); }
+    double nextDouble() { return Double.parseDouble(next()); }
+    public static void main(String[] args) {
+        ${NAME} x = new ${NAME}();
+        x.solve();
+    }
+
+    void test_case() {
+    }
+
+    void solve() {
+        int t = 1;
+        t = nextInt();
+        for (int tc = 1; tc <= t; tc++) {
+//            out.printf("Case #d: ", tc);
+            test_case();
+        }
+        out.flush();
+    }
+}
