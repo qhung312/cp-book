@@ -1,31 +1,32 @@
 #include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
 
-constexpr int mod = 1000000007;
-int norm(int x) {
-	if (x < 0) x += mod;
-	if (x >= mod) x -= mod;
-	return x;
-}
+constexpr int MOD = 1000000007;
+
 struct modnum {
 	int x;
-	modnum(ll _x = 0) : x(norm(_x % mod)) {}
+	modnum(int64_t _x = 0) : x(int(_x % MOD)) { if (x < 0) x += MOD; }
+	int value() const { return x; }
+	modnum inv() const { return pow(MOD-2); }
 
-	modnum operator+(modnum o) { return modnum(norm(x + o.x)); }
-	modnum operator-(modnum o) { return modnum(norm(x - o.x)); }
-	modnum operator*(modnum o) { return modnum((ll) x * o.x % mod); }
-	modnum operator/(modnum o) { return *this * o.inv(); }
-	modnum inv() const { return pow(mod - 2); }
+	modnum& operator+=(const modnum& o) { x += o.x; if (x >= MOD) x -= MOD; return *this; }
+	modnum& operator-=(const modnum& o) { x -= o.x; if (x < 0) x += MOD; return *this; }
+	modnum& operator*=(const modnum& o) { x = int(int64_t(x) * int64_t(o.x) % MOD); return *this; }
+	modnum& operator/=(const modnum& o) { return *this *= o.inv(); }
 
-	modnum pow(ll b) const {
+	friend modnum operator+(const modnum& a, const modnum& b) { modnum ans = a; ans += b; return ans; }
+	friend modnum operator-(const modnum& a, const modnum& b) { modnum ans = a; ans -= b; return ans; }
+	friend modnum operator*(const modnum& a, const modnum& b) { modnum ans = a; ans *= b; return ans; }
+	friend modnum operator/(const modnum& a, const modnum& b) { modnum ans = a; ans /= b; return ans; }
+
+	modnum pow(int64_t b) const {
 		modnum ans(1);
 		modnum a = *this;
-		for (; b; a = a * a, b /= 2) {
-			if (b % 2 == 1) {
-				ans = ans * a;
-			}
+		while (b) {
+			if (b % 2 == 1) ans = ans * a;
+			a *= a; b /= 2;
 		}
 		return ans;
 	}
 };
+
