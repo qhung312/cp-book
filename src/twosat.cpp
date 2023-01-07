@@ -9,19 +9,31 @@ struct twosat {
 	twosat(int _n) : n(_n), adj(2*n), ans(2*n), low(2*n, -1), num(2*n, -1), vis(2*n), comp(2*n) {}
 
 	void either(int i, bool x, int j, bool y) {
-		int a = (2*i)^x^1, b = (2*j)^y^1;
-		adj[a^1].push_back(b);
-		adj[b^1].push_back(a);
+		int a = (2 * i) ^ x ^ 1, b = (2 * j) ^ y ^ 1;
+		adj[a ^ 1].push_back(b);
+		adj[b ^ 1].push_back(a);
 	}
 
 	bool solve() {
-		for (int i = 0; i < 2*n; i++) if (num[i] == -1) dfs(i);
-		for (int i = 0; i < 2*n; i++) if (comp[i] == comp[i^1]) return false;
+		for (int i = 0; i < 2*n; i++) {
+			if (num[i] == -1) {
+				dfs(i);
+			}
+		}
+		for (int i = 0; i < 2*n; i++) {
+			if (comp[i] == comp[i ^ 1]) {
+				return false;
+			}
+		}
 
 		reverse(topo.begin(), topo.end());
 		vector<int> pos(2*n);
-		for (int i = 0; i < (int) topo.size(); i++) pos[topo[i]] = i;
-		for (int i = 0; i < 2*n; i++) ans[i] = pos[comp[i]] > pos[comp[i^1]];
+		for (int i = 0; i < (int) topo.size(); i++) {
+			pos[topo[i]] = i;
+		}
+		for (int i = 0; i < 2*n; i++) {
+			ans[i] = pos[comp[i]] > pos[comp[i^1]];
+		}
 		return true;
 	}
 
