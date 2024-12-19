@@ -46,12 +46,10 @@ private:
       if (edgeCapacity == 0 || level[v] != level[u] + 1)
         continue;
 
-      T pushed = dfs(v, sink, min(flow_pushed, edgeCapacity));
+      T pushed = dfs(v, sink, min(flow_pushed - flow, edgeCapacity));
       flow += pushed;
       edges[adj[u][i]].capacity -= pushed;
       edges[adj[u][i] ^ 1].capacity += pushed;
-      if (flow == flow_pushed)
-        return flow_pushed;
     }
     return flow;
   }
