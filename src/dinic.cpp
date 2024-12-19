@@ -1,80 +1,90 @@
-#include <bits/stdc++.h>
+#include <algorithm>
+#include <iostream>
+#include <limits>
+#include <queue>
+#include <stack>
+#include <vector>
+
 using namespace std;
 
-// Copied from: jiangly
+template <typename T> class Dinic {
+private:
+  vector<int> ptr;
 
-template <class T> struct dinic {
-    const int n;
-    struct Edge {
-        int to;
-        T cap;
-        Edge(int to, T cap) : to(to), cap(cap) {}
-    };
-
-    std::vector<Edge> edges;
-    std::vector<std::vector<int>> adj;
-    std::vector<int> cur, h;
-    dinic(int n) : n(n), adj(n) {}
-
-    bool bfs(int s, int t) {
-        h.assign(n, -1);
-        std::queue<int> que;
-        h[s] = 0;
-        que.push(s);
-
-        while (!que.empty()) {
-            const int u = que.front();
-            que.pop();
-
-            for (int i : adj[u]) {
-                auto v = edges[i].to;
-                auto c = edges[i].cap;
-                if (c > 0 && h[v] == -1) {
-                    h[v] = h[u] + 1;
-                    if (v == t)
-                        return true;
-                    que.push(v);
-                }
-            }
+  bool bfs(int source, int sink) {
+    // Returns true if source can reach sink using only positive capacity edges.
+    fill(level.begin(), level.end(), -1);
+    level[source] = 0;
+    queue<int> q;
+    q.push(source);
+    while (!q.empty()) {
+      int u = q.front();
+      q.pop();
+      for (int i : adj[u]) {
+        int v = edges[i].to;
+        int remainingCapacity = edges[i].capacity;
+        if (remainingCapacity > 0 && level[v] == -1) {
+          level[v] = level[u] + 1;
+          q.push(v);
         }
-        return false;
+      }
     }
+    return level[sink] != -1;
+  }
 
-    T dfs(int u, int t, T f) {
-        if (u == t)
-            return f;
+  T dfs(int u, int sink, T flow_pushed) {
+    if (u == sink)
+      return flow_pushed;
+    if (flow_pushed == 0)
+      return 0;
 
-        auto r = f;
-        for (int &i = cur[u]; i < int(adj[u].size()); ++i) {
-            const int j = adj[u][i];
-            auto v = edges[j].to;
-            auto c = edges[j].cap;
-            if (c > 0 && h[v] == h[u] + 1) {
-                auto a = dfs(v, t, std::min(r, c));
+    T flow = 0;
+    for (int &i = ptr[u]; i < adj[u].size(); i++) {
+      int v = edges[adj[u][i]].to;
+      int edgeCapacity = edges[adj[u][i]].capacity;
 
-                edges[j].cap -= a;
-                edges[j ^ 1].cap += a;
-                r -= a;
-                if (r == 0)
-                    return f;
-            }
-        }
-        return f - r;
+      if (edgeCapacity == 0 || level[v] != level[u] + 1)
+        continue;
+
+      T pushed = dfs(v, sink, min(flow_pushed, edgeCapacity));
+      flow += pushed;
+      edges[adj[u][i]].capacity -= pushed;
+      edges[adj[u][i] ^ 1].capacity += pushed;
+      if (flow == flow_pushed)
+        return flow_pushed;
     }
+    return flow;
+  }
 
-    void addEdge(int u, int v, T c) {
-        adj[u].push_back(edges.size());
-        edges.emplace_back(v, c);
-        adj[v].push_back(edges.size());
-        edges.emplace_back(u, 0);
-    }
+public:
+  struct Edge {
+    int from, to;
+    T capacity;
+    explicit Edge(int _from, int _to, T _capacity)
+        : from(_from), to(_to), capacity(_capacity) {}
+  };
 
-    T maxFlow(int s, int t) {
-        T ans = 0;
-        while (bfs(s, t)) {
-            cur.assign(n, 0);
-            ans += dfs(s, t, std::numeric_limits<T>::max());
-        }
-        return ans;
+  // Expose internal data structures to make it easier to work with graph
+  // after running max flow. This is helpful for many problems (e.g min cut).
+  vector<vector<int>> adj;
+  vector<Edge> edges;
+  vector<int> level;
+
+  explicit Dinic(int _n) : adj(_n), level(_n), ptr(_n) {}
+
+  void add_edge(int from, int to, T capacity) {
+    adj[from].push_back(edges.size());
+    edges.emplace_back(from, to, capacity);
+    adj[to].push_back(edges.size());
+    edges.emplace_back(to, from, 0);
+  }
+
+  T max_flow(int source, int sink) {
+    T flow = 0;
+    while (bfs(source, sink)) {
+      fill(ptr.begin(), ptr.end(), 0);
+      flow += dfs(source, sink, std::numeric_limits<T>::max());
     }
+    return flow;
+  }
 };
